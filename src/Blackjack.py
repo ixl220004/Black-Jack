@@ -32,20 +32,20 @@ def calculate_hand(hand):
 
     return total
 
-def draw_card():
+def draw_card(selected_Hand):
     drawn_card = random.choice(deck)
-    hand.append(drawn_card)
+    selected_Hand.append(drawn_card)
 
-    print(f"Your hand: {hand}")
-    print(f"Your hand value: {calculate_hand(hand)}")
+    print(f"Your hand: {selected_Hand}")
+    print(f"Your hand value: {calculate_hand(selected_Hand)}")
 
 
 def player_choice(): 
-  draw_card()
+  draw_card(hand)
   while True:
     choice = input("draw card y/n?\n")
     if choice == "y":
-        draw_card()
+        draw_card(hand)
         if calculate_hand(hand) > 21:
            print("BUST!!!!")
            return True
@@ -57,8 +57,7 @@ def player_choice():
 def deal():
    dealer_hand = []
 
-   draw_card = random.choice(deck)
-   dealer_hand.append(draw_card)
+   draw_card(dealer_hand)
    
    print(f"Dealer's hand:{dealer_hand}")
    print(f"Dealer's value: {calculate_hand(dealer_hand)}")
