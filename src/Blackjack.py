@@ -10,6 +10,7 @@ with open("deck.txt", 'r') as f:
 
 hand = []
 hand_value = []
+dealer_hand = []
 
 #counts the card of the hand put into the parameter
 def calculate_hand(hand):
@@ -47,6 +48,10 @@ def draw_card(selected_Hand):
         print(f"Your hand: {selected_Hand}")
         print(f"Your hand value: {calculate_hand(selected_Hand)}")
 
+    if selected_Hand == dealer_hand:
+       print(f"Dealer's hand: {dealer_hand}")
+       print(f"Dealer's value: {calculate_hand(dealer_hand)}")
+
 #basic game loop, player is given choice to draw cards or 
 def player_choice(): 
   draw_card(hand)
@@ -64,20 +69,15 @@ def player_choice():
 #the player's choice to see if the player draws or stands.
 #then the dealer draws until 17, and checks if either player or dealer wins.
 def deal():
-   dealer_hand = []
+   
 
    draw_card(dealer_hand)
-   
-   print(f"Dealer's hand:{dealer_hand}")
-   print(f"Dealer's value: {calculate_hand(dealer_hand)}")
 
    player_bust = player_choice()
-
 
    if player_bust == True:
       print("YOU LOSE (player bust)")
       return
-
 
 
    if player_bust == False:
@@ -87,9 +87,6 @@ def deal():
         
         while calculate_hand(dealer_hand) < 17:
             draw_card(dealer_hand)
-
-            print(f"Dealer's hand: {dealer_hand}")
-            print(f"Dealer's value: {calculate_hand(dealer_hand)}")
             time.sleep(1)
 
         # check bust AFTER finishing drawing
@@ -118,4 +115,3 @@ def deal():
 
 
 deal()
-print(deck)
