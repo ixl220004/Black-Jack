@@ -11,6 +11,7 @@ with open("deck.txt", 'r') as f:
 hand = []
 hand_value = []
 
+#counts the card of the hand put into the parameter
 def calculate_hand(hand):
     total = 0
     aces = 0
@@ -32,14 +33,21 @@ def calculate_hand(hand):
 
     return total
 
+#draws a random card and puts it into the parameter.
+#removes the card from the deck list aswell.
+# if repeated within the script, it will just draw cards until the deck is empty.
+# SHUFFLE FUNCTION NEEDED FOR LONG PLAY
 def draw_card(selected_Hand):
     drawn_card = random.choice(deck)
+    deck.remove(drawn_card)
     selected_Hand.append(drawn_card)
+    
 
-    print(f"Your hand: {selected_Hand}")
-    print(f"Your hand value: {calculate_hand(selected_Hand)}")
+    if selected_Hand == hand:
+        print(f"Your hand: {selected_Hand}")
+        print(f"Your hand value: {calculate_hand(selected_Hand)}")
 
-
+#basic game loop, player is given choice to draw cards or 
 def player_choice(): 
   draw_card(hand)
   while True:
@@ -52,8 +60,9 @@ def player_choice():
     else:
       return False
 
-    
-
+#main game loop, first dealer draws card, then player, runs 
+#the player's choice to see if the player draws or stands.
+#then the dealer draws until 17, and checks if either player or dealer wins.
 def deal():
    dealer_hand = []
 
@@ -77,8 +86,7 @@ def deal():
 
         
         while calculate_hand(dealer_hand) < 17:
-            draw_card2 = random.choice(deck)
-            dealer_hand.append(draw_card2)
+            draw_card(dealer_hand)
 
             print(f"Dealer's hand: {dealer_hand}")
             print(f"Dealer's value: {calculate_hand(dealer_hand)}")
@@ -102,9 +110,12 @@ def deal():
    else:
     print("TIE!!!")
 
+
+
       
    
 
 
 
 deal()
+print(deck)
