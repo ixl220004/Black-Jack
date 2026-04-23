@@ -11,6 +11,7 @@ with open("deck.txt", 'r') as f:
 hand = []
 hand_value = []
 dealer_hand = []
+discard_pile = []
 
 #counts the card of the hand put into the parameter
 def calculate_hand(hand):
@@ -33,6 +34,15 @@ def calculate_hand(hand):
         aces -= 1
 
     return total
+
+
+def discard(selected_hand):
+   removed_cards = selected_hand
+   selected_hand.remove(removed_cards)
+   discard_pile.append(removed_cards)
+   
+    
+
 
 #draws a random card and puts it into the parameter.
 #removes the card from the deck list aswell.
@@ -95,6 +105,8 @@ def deal():
             dealer_bust = True
         else:
             dealer_bust = False
+
+
         
    if player_bust:
     print("YOU LOSE (player bust)")
@@ -106,6 +118,13 @@ def deal():
     print("YOU LOSE!!!")
    else:
     print("TIE!!!")
+
+   time.sleep(1)
+   discard(hand)
+   discard(dealer_hand)
+   print(discard_pile)
+
+    
 
 
 
