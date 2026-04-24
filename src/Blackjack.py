@@ -37,11 +37,24 @@ def calculate_hand(hand):
 
 
 def discard(selected_hand):
-   removed_cards = selected_hand
-   selected_hand.remove(removed_cards)
-   discard_pile.append(removed_cards)
-   
+   discard_pile.extend(selected_hand)
+   selected_hand.clear()
     
+
+
+
+def shuffle(deck):
+   if len(deck) <10:
+      deck.extend(discard_pile)
+      discard_pile.clear()
+      print("SHUFFLE")
+      
+
+def deck_check():
+   time.sleep(1)
+   discard(hand)
+   discard(dealer_hand)
+   
 
 
 #draws a random card and puts it into the parameter.
@@ -85,9 +98,7 @@ def deal():
 
    player_bust = player_choice()
 
-   if player_bust == True:
-      print("YOU LOSE (player bust)")
-      return
+  
 
 
    if player_bust == False:
@@ -108,21 +119,33 @@ def deal():
 
 
         
-   if player_bust:
-    print("YOU LOSE (player bust)")
-   elif dealer_bust:
-    print("YOU WIN (dealer bust)")
-   elif calculate_hand(hand) > calculate_hand(dealer_hand):
-    print("YOU WIN!!!")
-   elif calculate_hand(hand) < calculate_hand(dealer_hand):
-    print("YOU LOSE!!!")
-   else:
-    print("TIE!!!")
+   result = None
 
-   time.sleep(1)
-   discard(hand)
-   discard(dealer_hand)
-   print(discard_pile)
+   if player_bust:
+      result = "loss"
+      print("YOU LOSE (player bust)")
+
+   elif dealer_bust:
+      result = "win"
+      print("YOU WIN (dealer bust)")
+
+   elif calculate_hand(hand) > calculate_hand(dealer_hand):
+      result = "win"
+      print("YOU WIN!!!")
+
+   elif calculate_hand(hand) < calculate_hand(dealer_hand):
+      result = "loss"
+      print("YOU LOSE!!!")
+
+   else:
+      result = "push"
+      print("TIE!!!")
+
+   deck_check()
+   return result
+
+
+   
 
     
 
