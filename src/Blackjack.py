@@ -136,9 +136,13 @@ def deal():
    elif calculate_hand(hand) < calculate_hand(dealer_hand):
       result = "loss"
       print("YOU LOSE!!!")
-   elif calculate_hand(hand) == 21:
-      
+   elif calculate_hand(hand) == 21 and calculate_hand(dealer_hand) != 21:
+    result = "blackjack_win"
+    print("BLACKJACK!!! YOU WIN!!!")
 
+   elif calculate_hand(hand) == 21 and calculate_hand(dealer_hand) == 21:
+    result = "push"
+    print("BOTH HAVE 21! TIE!")
    else:
       result = "push"
       print("TIE!!!")

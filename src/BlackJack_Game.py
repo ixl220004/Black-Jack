@@ -39,6 +39,7 @@ def earnings(result):
     elif result == "push":
         print("Push (no money change)")
     elif result == "blackjack_win":
+        print(f"You won (blackjack) ${current_bet}")
         wallet += current_bet *1.5
 
     print(f"Wallet: ${wallet}")
