@@ -1,5 +1,6 @@
 import Blackjack
 
+
 wallet = 100
 current_bet = 0
 
@@ -38,9 +39,11 @@ def earnings(result):
 
     elif result == "push":
         print("Push (no money change)")
-    elif result == "blackjack_win":
-        print(f"You won (blackjack) ${current_bet}")
-        wallet += current_bet *1.5
+    elif result == "blackjack_win":   
+        winnings = int(current_bet * 1.5)
+        wallet += winnings
+        print(f"Blackjack! You won ${winnings}")
+        
 
     print(f"Wallet: ${wallet}")
 
@@ -49,8 +52,12 @@ def Game():
     global current_bet
 
     while wallet > 0:
-        if input("Play the game? y/n: ") != "y":
+        choice = input("Play the game? y/n: ").lower()
+        if choice == "n":
             break
+        elif choice != "y":
+            print("invalid input")
+            continue
 
         current_bet = bets()
 
