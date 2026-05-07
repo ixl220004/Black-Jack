@@ -20,6 +20,10 @@ class button:
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
 
+
+
+
+
 #screen size
 x, y = 800, 600
 screen = pygame.display.set_mode((x,y))
@@ -34,10 +38,17 @@ quit_button = button(300, 300, 200, 60, "Quit")
 
 font = pygame.font.SysFont(None,36)
 
+def draw_text(text, x, y, font, color=(255, 255, 255)):
+    text_surface = font.render(text, True, color)
+    screen.blit(text_surface, (x,y))
+
+
 
 wallet = 100
 state = "menu"
 round_started = False
+bet = 0
+bet_input = ""
 
 
 hand = []
@@ -69,20 +80,50 @@ while running:
                     if wallet <= 0:
                         state = "game_over"
                     else:
-                        state = "playing"
+                        state = "betting"
                         round_starded = False
 
                 if quit_button.is_clicked(mouse_pos):
                     state = "game_over"
+
+
+            
+                
         
             elif state == "playing":
 
                 if hit_button.is_clicked(mouse_pos):
+                
                     Blackjack.draw_card(hand)
                     print(hand)
+                    
+
+                    if Blackjack.calculate_hand(hand) > 21:
+                        print("bust")
+                        state = "round_over"
+                            
+                        
             
                 if stand_button.is_clicked(mouse_pos):
                     print("stand")
+                    state = "dealer_turn"
+        
+        if event.type ==pygame.KEYDOWN and state == "betting":
+
+            if event.key == pygame.K_RETURN:
+                if bet_input.isdigit():
+                    bet = int(bet_input)
+
+                    if bet > 0 and bet <= wallet:
+                        state = "playing"
+                        round_started = False
+                bet_input = ""
+            
+            elif event.key == pygame.K_BACKSPACE:
+                bet_input = bet_input[:-1]
+            else:
+                if event.unicode.isdigit():
+                    bet_input += event.unicode
 
     
     #game logic
@@ -114,6 +155,11 @@ while running:
     elif state == "menu":
         play_button.draw(screen, font)
         quit_button.draw(screen, font)
+
+    elif state == "betting":
+        draw_text("enter your bet:", 300, 200, font)
+        draw_text(bet_input, 300, 250, font)
+        draw_text(f"Wallet: ${wallet}", 300, 150, font)
 
     #dislpay flip
     pygame.display.flip()
