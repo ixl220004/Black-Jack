@@ -1,6 +1,6 @@
 import pygame
 import sys
-
+import Blackjack
 
 pygame.init()
 
@@ -37,7 +37,16 @@ font = pygame.font.SysFont(None,36)
 
 wallet = 100
 state = "menu"
+round_started = False
 
+
+hand = []
+hand_value = []
+dealer_hand = []
+discard_pile = []
+
+with open("deck.txt", 'r') as f:
+  deck = [line.strip() for line in f]
 
 
 #game loop
@@ -61,6 +70,7 @@ while running:
                         state = "game_over"
                     else:
                         state = "playing"
+                        round_starded = False
 
                 if quit_button.is_clicked(mouse_pos):
                     state = "game_over"
@@ -68,7 +78,8 @@ while running:
             elif state == "playing":
 
                 if hit_button.is_clicked(mouse_pos):
-                    print ("hit")
+                    Blackjack.draw_card(hand)
+                    print(hand)
             
                 if stand_button.is_clicked(mouse_pos):
                     print("stand")
@@ -76,8 +87,22 @@ while running:
     
     #game logic
 
-    if state == "playing":
-        pass 
+    if state == "playing" and not round_started:
+
+        hand.clear()
+        dealer_hand.clear()
+
+        Blackjack.draw_card(hand)
+        Blackjack.draw_card(hand)
+
+        Blackjack.draw_card(dealer_hand)
+
+        print(f"{hand}")
+
+        round_started = True
+        
+
+        
     
 
     #draw
