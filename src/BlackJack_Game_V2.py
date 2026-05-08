@@ -1,4 +1,4 @@
-import Blackjack
+import Blackjack_V1
 
 
 wallet = 100
@@ -61,7 +61,7 @@ def Game():
 
         current_bet = bets()
 
-        result = Blackjack.deal()   # ✅ capture result
+        result = Blackjack_V1.deal()   # ✅ capture result
         earnings(result)            # ✅ pass result
 
     print("Game over.")
