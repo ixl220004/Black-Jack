@@ -1,7 +1,8 @@
 import pygame
 import sys
-import Blackjack
 import random
+import BlackJack_functions
+
 
 pygame.init()
 
@@ -70,6 +71,7 @@ def draw_card(hand):
 
 player_area = pygame.Rect(100, 400, 600, 150)
 dealer_area = pygame.Rect(100, 100, 600, 150)
+hand_value_box = pygame.Rect(420, 350, 250, 50)
 
 def calculate_hand(hand):
     total = 0
@@ -92,6 +94,8 @@ state = "menu"
 round_started = False
 bet = 0
 bet_input = ""
+
+
 
 CARD_WIDTH = 80
 CARD_HEIGHT = 120
@@ -132,7 +136,6 @@ hand = []
 hand_value = []
 dealer_hand = []
 discard_pile = []
-
 
 
 #game loop
@@ -246,6 +249,15 @@ while running:
         draw_hand(hand, player_area)
         draw_hand(dealer_hand, dealer_area, hide_first_card=(state=="playing"))
 
+        pygame.draw.rect(screen, (255, 255, 255), hand_value_box, 2)
+        current_value = BlackJack_functions.calculate_hand(hand)
+        draw_text(
+    f"Hand value: {BlackJack_functions.calculate_hand(hand)}",
+    hand_value_box.x + 10,
+    hand_value_box.y + 10,
+    font,
+    (255, 255, 255)
+)
 
 
     
