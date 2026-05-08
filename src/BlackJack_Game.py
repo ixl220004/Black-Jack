@@ -69,10 +69,6 @@ def draw_card(hand):
     hand.append(card)
 
 
-player_area = pygame.Rect(100, 400, 600, 150)
-dealer_area = pygame.Rect(100, 100, 600, 150)
-hand_value_box = pygame.Rect(420, 350, 250, 50)
-
 def calculate_hand(hand):
     total = 0
     aces = 0
@@ -88,12 +84,22 @@ def calculate_hand(hand):
 
     return total
 
+player_area = pygame.Rect(100, 400, 600, 150)
+dealer_area = pygame.Rect(100, 100, 600, 150)
+hand_value_box = pygame.Rect(420, 350, 250, 50)
+
 #variables
 wallet = 100
 state = "menu"
 round_started = False
 bet = 0
 bet_input = ""
+dealer_draw_timer = 0
+dealer_delay = 800
+
+#win variables
+results = 
+
 
 
 
@@ -136,6 +142,8 @@ hand = []
 hand_value = []
 dealer_hand = []
 discard_pile = []
+
+
 
 
 #game loop
@@ -187,9 +195,8 @@ while running:
                         
             
                 if stand_button.is_clicked(mouse_pos):
-                    print("stand")
                     state = "dealer_turn"
-        
+                    dealer_timer = pygame.time.get_ticks()
 
         #betting phase
         #asks player how much they want to bet before the playing phase
@@ -230,48 +237,119 @@ while running:
 
         round_started = True
         
+    if state == "dealer_turn":
+        current_time = pygame.time.get_ticks()
+
+        if current_time - dealer_timer > dealer_delay:
+            dealer_timer = current_time
+
+            if calculate_hand(dealer_hand) < 17:
+                draw_card(dealer_hand)
+            else:
+            
+                state = "round_over"
+
+
+    if state == "round_over":
+        current_time = pygame.time.get_ticks()
+
+
+
+
+        if player_bust:
+            result = "loss"
+            print("YOU LOSE (player bust)")
+
+        elif dealer_bust:
+            result = "win"
+            print("YOU WIN (dealer bust)")
+
+        elif calculate_hand(hand) > calculate_hand(dealer_hand):
+            result = "win"
+            print("YOU WIN!!!")
+
+        elif calculate_hand(hand) < calculate_hand(dealer_hand):
+            result = "loss"
+            print("YOU LOSE!!!")
+        elif calculate_hand(hand) == 21 and len(hand) == 2:
+            result = "blackjack_win"
+            print("BLACKJACK!!! YOU WIN!!!")
+        else:
+            result = "push"
+            print("TIE!!!")
+                
+
+
 
         
     
 
     #DRAW
-    screen.fill((0,0,0))
-    #global UI
-    draw_text(f"Wallet:${wallet}", 20, 20, font)
-    #state UI
-    if state == "playing":
-        hit_button.draw(screen, font)
-        stand_button.draw(screen, font)
+    screen.fill((0, 0, 0))
 
-        pygame.draw.rect(screen, (255,255,255), player_area, 2)
-        pygame.draw.rect(screen, (255,255,255), dealer_area, 2)
+    # GLOBAL UI
+    draw_text(f"Wallet: ${wallet}", 20, 20, font)
 
-        draw_hand(hand, player_area)
-        draw_hand(dealer_hand, dealer_area, hide_first_card=(state=="playing"))
-
-        pygame.draw.rect(screen, (255, 255, 255), hand_value_box, 2)
-        current_value = BlackJack_functions.calculate_hand(hand)
-        draw_text(
-    f"Hand value: {BlackJack_functions.calculate_hand(hand)}",
-    hand_value_box.x + 10,
-    hand_value_box.y + 10,
-    font,
-    (255, 255, 255)
-)
-
-
-    
-    elif state == "menu":
+    # ---------------- MENU ----------------
+    if state == "menu":
         play_button.draw(screen, font)
         quit_button.draw(screen, font)
 
+    # ---------------- BETTING ----------------
     elif state == "betting":
-        draw_text("enter your bet:", 300, 200, font)
+        draw_text("Enter your bet:", 300, 200, font)
+
         if bet_input == "":
             draw_text("Type number...", 300, 250, font, (150, 150, 150))
         else:
             draw_text(f"${bet_input}", 300, 250, font)
-    #dislpay flip
+
+    # ---------------- PLAYING + DEALER + ROUND OVER ----------------
+    elif state in ["playing", "dealer_turn", "round_over"]:
+
+        # table
+        pygame.draw.rect(screen, (255, 255, 255), player_area, 2)
+        pygame.draw.rect(screen, (255, 255, 255), dealer_area, 2)
+
+        # hands
+        hide_dealer = (state == "playing")
+        draw_hand(hand, player_area)
+        draw_hand(dealer_hand, dealer_area, hide_first_card=hide_dealer)
+
+        # values ALWAYS updated
+        player_value = calculate_hand(hand)
+        dealer_value = calculate_hand(dealer_hand)
+
+        # player value
+        draw_text(
+            f"Player: {player_value}",
+            player_area.x,
+            player_area.y + player_area.height + 10,
+            font
+        )
+
+        # dealer value
+        if state == "playing":
+            draw_text(
+                "Dealer: ?",
+                dealer_area.x,
+                dealer_area.y + dealer_area.height + 10,
+                font
+            )
+        else:
+            draw_text(
+                f"Dealer: {dealer_value}",
+                dealer_area.x,
+                dealer_area.y + dealer_area.height + 10,
+                font
+            )
+
+        # buttons only in playing
+        if state == "playing":
+            hit_button.draw(screen, font)
+            stand_button.draw(screen, font)
+
+    # ---------------- UPDATE SCREEN ----------------
     pygame.display.flip()
 
 pygame.quit()
