@@ -37,6 +37,9 @@ hit_button = button(100, 350, 120, 50, "Hit")
 stand_button = button(250, 350, 120, 50, "Stand")
 play_button = button(300, 200, 200, 60, "play")
 quit_button = button(300, 300, 200, 60, "Quit")
+play_again_button = button(250, 250, 200, 60, "Play Again")
+quit_end_button = button(250, 330, 200, 60, "Quit")
+
 
 font = pygame.font.SysFont("arial",36)
 
@@ -104,6 +107,7 @@ player_area = pygame.Rect(100, 400, 600, 150)
 dealer_area = pygame.Rect(100, 100, 600, 150)
 hand_value_box = pygame.Rect(420, 350, 250, 50)
 
+
 #variables
 wallet = 100
 state = "menu"
@@ -117,7 +121,7 @@ dealer_delay = 800
 
 result_applied = False
 round_over_entered = False
-
+game_over_reason = ""
 
 
 
@@ -218,6 +222,35 @@ while running:
                     state = "dealer_turn"
                     dealer_timer = pygame.time.get_ticks()
 
+
+
+
+        if state == "game_over" and event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+                    
+            if play_again_button.is_clicked(mouse_pos):
+                wallet = 100
+                bet = 0
+                bet_input = ""
+                result_applied = False
+                round_over_entered = False
+                game_over_reason = ""
+
+                hand.clear()
+                dealer_hand.clear()
+
+                deck = []
+                for suit in suits:
+                    for rank, value in ranks.items():
+                        deck.append({"rank": rank, "value": value, "suit": suit})
+                random.shuffle(deck)
+
+                state = "betting"
+                round_started = False
+
+
+            if quit_end_button.is_clicked(mouse_pos):
+                running = False
         #betting phase
         #asks player how much they want to bet before the playing phase
         if event.type ==pygame.KEYDOWN and state == "betting":
@@ -237,16 +270,25 @@ while running:
                 if event.unicode.isdigit():
                     bet_input += event.unicode
         
-        if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN and round_over_entered == False:
-            hand.clear()
-            dealer_hand.clear()
+        if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = event.pos
 
-            state = "betting"
-            bet = 0
-            bet_input = ""
-            result_applied = False
-            round_started = False
-                
+            if play_again_button.is_clicked(mouse_pos):
+                # reset round only
+                hand.clear()
+                dealer_hand.clear()
+
+                bet = 0
+                bet_input = ""
+
+                result_applied = False
+                round_over_entered = False
+
+                state = "betting"
+
+            elif quit_end_button.is_clicked(mouse_pos):
+                state = "game_over"
+                game_over_reason = "Player Quit"
                 
             
         
@@ -294,6 +336,10 @@ while running:
 
             elif result == "lose" or result == "player_bust":
                 wallet -= bet
+            
+            if wallet <= 0:
+                state = "game_over"
+                game_over_reason = "Out of Funds"
 
             # push = no change
 
@@ -330,7 +376,7 @@ while running:
             draw_text(f"${bet_input}", 300, 250, font)
 
     # ---------------- PLAYING + DEALER + ROUND OVER ----------------
-    elif state in ["playing", "dealer_turn", "round_over"]:
+    elif state in ["playing", "dealer_turn", "round_over", "game_over" ]:
 
         # table
         pygame.draw.rect(screen, (255, 255, 255), player_area, 2)
@@ -338,6 +384,8 @@ while running:
 
         # hands
         hide_dealer = (state == "playing")
+        if state == "game_over":
+            hide_dealer = False
         draw_hand(hand, player_area)
         draw_hand(dealer_hand, dealer_area, hide_first_card=hide_dealer)
 
@@ -375,9 +423,31 @@ while running:
             stand_button.draw(screen, font)
 
         if state == "round_over":
-            draw_text(f"Results:{result}", 300, 300, font)
-            draw_text("Click to continue?", 300, 400, font)
-            round_over_entered = False
+            overlay = pygame.Surface((x, y))
+            overlay.set_alpha(180)
+            overlay.fill((0,0,0))
+            screen.blit(overlay, (0, 0))
+            draw_text(f"Results: {result}", 300, 200, font)
+
+            
+            quit_end_button.draw(screen, font)
+            play_again_button.draw(screen, font)
+
+        if state == "game_over":
+            overlay = pygame.Surface((x, y))
+            overlay.set_alpha(180)
+            overlay.fill((0,0,0))
+            screen.blit(overlay, (0, 0))
+            
+
+            draw_text("GAME OVER", 250, 200, font)
+            draw_text(game_over_reason, 250, 260, font)
+
+            play_again_button.draw(screen, font)
+            quit_end_button.draw(screen, font)
+            
+
+
 
         
 
