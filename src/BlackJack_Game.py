@@ -114,8 +114,9 @@ dealer_draw_timer = 0
 dealer_delay = 800
 
 #win variables
-result = ""
+
 result_applied = False
+round_over_entered = False
 
 
 
@@ -207,8 +208,9 @@ while running:
                     
 
                     if calculate_hand(hand) > 21:
-                        print("bust")
+                        result = "player_bust"
                         state = "round_over"
+                        round_over_entered = True
                             
                         
             
@@ -235,13 +237,18 @@ while running:
                 if event.unicode.isdigit():
                     bet_input += event.unicode
         
-        if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN:
+        if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN and round_over_entered == False:
+            hand.clear()
+            dealer_hand.clear()
+
             state = "betting"
             bet = 0
             bet_input = ""
-            result = ""
             result_applied = False
-        
+            round_started = False
+                
+                
+            
         
 
     
@@ -271,11 +278,13 @@ while running:
             if calculate_hand(dealer_hand) < 17:
                 draw_card(dealer_hand)
             else:
-            
+                result = resolve_round(hand, dealer_hand)
                 state = "round_over"
+                round_over_entered = True
+                result_applied = False
 
 
-    if state == "round_over":
+    if state == "round_over" and round_over_entered and not result_applied:
 
     
         if not result_applied:
@@ -368,6 +377,7 @@ while running:
         if state == "round_over":
             draw_text(f"Results:{result}", 300, 300, font)
             draw_text("Click to continue?", 300, 400, font)
+            round_over_entered = False
 
         
 
