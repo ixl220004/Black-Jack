@@ -40,6 +40,7 @@ quit_button = button(300, 300, 200, 60, "Quit")
 
 font = pygame.font.SysFont("arial",36)
 
+#functions
 def draw_text(text, x, y, font, color=(255, 255, 255)):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x,y))
@@ -84,6 +85,21 @@ def calculate_hand(hand):
 
     return total
 
+def resolve_round(player, dealer):
+    player_total = calculate_hand(player)
+    dealer_total = calculate_hand(dealer)
+
+    if player_total > 21:
+        return "player_bust"
+    if dealer_total > 21:
+        return "dealer_bust"
+    if player_total > dealer_total:
+        return "win"
+    if player_total < dealer_total:
+        return "lose"
+    return "push"
+
+
 player_area = pygame.Rect(100, 400, 600, 150)
 dealer_area = pygame.Rect(100, 100, 600, 150)
 hand_value_box = pygame.Rect(420, 350, 250, 50)
@@ -98,7 +114,9 @@ dealer_draw_timer = 0
 dealer_delay = 800
 
 #win variables
-results = 
+result = ""
+result_applied = False
+
 
 
 
@@ -217,6 +235,13 @@ while running:
                 if event.unicode.isdigit():
                     bet_input += event.unicode
         
+        if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN:
+            state = "betting"
+            bet = 0
+            bet_input = ""
+            result = ""
+            result_applied = False
+        
         
 
     
@@ -251,32 +276,23 @@ while running:
 
 
     if state == "round_over":
-        current_time = pygame.time.get_ticks()
+
+    
+        if not result_applied:
+
+            if result == "win" or result == "dealer_bust":
+                wallet += bet
+
+            elif result == "lose" or result == "player_bust":
+                wallet -= bet
+
+            # push = no change
+
+            result_applied = True
 
 
 
-
-        if player_bust:
-            result = "loss"
-            print("YOU LOSE (player bust)")
-
-        elif dealer_bust:
-            result = "win"
-            print("YOU WIN (dealer bust)")
-
-        elif calculate_hand(hand) > calculate_hand(dealer_hand):
-            result = "win"
-            print("YOU WIN!!!")
-
-        elif calculate_hand(hand) < calculate_hand(dealer_hand):
-            result = "loss"
-            print("YOU LOSE!!!")
-        elif calculate_hand(hand) == 21 and len(hand) == 2:
-            result = "blackjack_win"
-            print("BLACKJACK!!! YOU WIN!!!")
-        else:
-            result = "push"
-            print("TIE!!!")
+        
                 
 
 
@@ -348,6 +364,12 @@ while running:
         if state == "playing":
             hit_button.draw(screen, font)
             stand_button.draw(screen, font)
+
+        if state == "round_over":
+            draw_text(f"Results:{result}", 300, 300, font)
+            draw_text("Click to continue?", 300, 400, font)
+
+        
 
     # ---------------- UPDATE SCREEN ----------------
     pygame.display.flip()
