@@ -16,3 +16,11 @@ def calculate_hand(hand):
         aces -= 1
 
     return total
+
+discard_pile = []
+
+def shuffle(deck):
+   if len(deck) <10:
+      deck.extend(discard_pile)
+      discard_pile.clear()
+      print("SHUFFLE")

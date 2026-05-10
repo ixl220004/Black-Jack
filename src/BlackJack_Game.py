@@ -9,15 +9,19 @@ pygame.init()
 
 
 class button:
-    def __init__(self, x, y, width, height, text):
+    def __init__(self, x, y, width, height, text, color=(0, 200, 0)):
         self.rect = pygame.Rect(x,y,width,height)
         self.text = text
-
-    def draw(self, screen, font):
-        pygame.draw.rect(screen, (0, 200, 0), self.rect)
+        self.color = color
+        
+    def draw(self, screen, font, color=None):
+        draw_color = color if color else self.color
+        pygame.draw.rect(screen, draw_color, self.rect)
 
         text_surface = font.render(self.text, True, (255, 255, 255))
-        screen.blit(text_surface, (self.rect.x + 10, self.rect.y + 10))
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
+        
     
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
@@ -37,8 +41,8 @@ hit_button = button(100, 350, 120, 50, "Hit")
 stand_button = button(250, 350, 120, 50, "Stand")
 play_button = button(300, 200, 200, 60, "play")
 quit_button = button(300, 300, 200, 60, "Quit")
-play_again_button = button(250, 250, 200, 60, "Play Again")
-quit_end_button = button(250, 330, 200, 60, "Quit")
+play_again_button = button(250, 250, 200, 60, "Play Again",)
+quit_end_button = button(250, 330, 200, 60, "Quit",)
 
 
 font = pygame.font.SysFont("arial",36)
@@ -69,6 +73,16 @@ def draw_hand(hand, area_rect, hide_first_card = False):
 
 
 def draw_card(hand):
+    global deck, discard_pile
+
+    if len(deck) == 0:
+        if len(discard_pile) == 0:
+            raise Exception("NO CARDS LEFT ANYWHERE")
+        deck.extend(discard_pile)
+        discard_pile.clear()
+        random.shuffle(deck)
+        print("RESHUFFLE")
+
     card = deck.pop()
     hand.append(card)
 
@@ -88,6 +102,12 @@ def calculate_hand(hand):
 
     return total
 
+def is_blackjack(hand):
+    return len(hand) == 2 and calculate_hand(hand) == 21
+
+
+
+
 def resolve_round(player, dealer):
     player_total = calculate_hand(player)
     dealer_total = calculate_hand(dealer)
@@ -101,6 +121,7 @@ def resolve_round(player, dealer):
     if player_total < dealer_total:
         return "lose"
     return "push"
+
 
 
 player_area = pygame.Rect(100, 400, 600, 150)
@@ -206,8 +227,8 @@ while running:
             elif state == "playing":
 
                 if hit_button.is_clicked(mouse_pos):
-                
                     draw_card(hand)
+
                     
                     
 
@@ -215,6 +236,8 @@ while running:
                         result = "player_bust"
                         state = "round_over"
                         round_over_entered = True
+
+                        
                             
                         
             
@@ -306,10 +329,26 @@ while running:
         draw_card(hand)
 
         draw_card(dealer_hand)
+        draw_card(dealer_hand)
+
+        player_bj = is_blackjack(hand)
+        dealer_bj = is_blackjack(dealer_hand)
 
         
 
         round_started = True
+
+        if player_bj or dealer_bj:
+            if player_bj and dealer_bj:
+                result = "push_blackjack"
+            elif player_bj:
+                result = "blackjack"
+            else:
+                result = "dealer_blackjack"
+
+            state = "round_over"
+            round_over_entered = True
+            result_applied = False
         
     if state == "dealer_turn":
         current_time = pygame.time.get_ticks()
@@ -331,11 +370,19 @@ while running:
     
         if not result_applied:
 
-            if result == "win" or result == "dealer_bust":
+            
+            if result == "blackjack":
+                wallet += int(bet * 1.5)
+            
+            elif result == "win" or result == "dealer_bust":
                 wallet += bet
 
-            elif result == "lose" or result == "player_bust":
+            elif result in ["lose", "player_bust", "dealer_blackjack"]:
                 wallet -= bet
+
+
+            discard_pile.extend(hand)
+            discard_pile.extend(dealer_hand)
             
             if wallet <= 0:
                 state = "game_over"
@@ -356,7 +403,7 @@ while running:
     
 
     #DRAW
-    screen.fill((0, 0, 0))
+    screen.fill((0, 100, 50))
 
     # GLOBAL UI
     draw_text(f"Wallet: ${wallet}", 20, 20, font)
@@ -427,7 +474,7 @@ while running:
             overlay.set_alpha(180)
             overlay.fill((0,0,0))
             screen.blit(overlay, (0, 0))
-            draw_text(f"Results: {result}", 300, 200, font)
+            draw_text(f"Results: {result}", 250, 200, font)
 
             
             quit_end_button.draw(screen, font)
@@ -443,8 +490,8 @@ while running:
             draw_text("GAME OVER", 250, 200, font)
             draw_text(game_over_reason, 250, 260, font)
 
-            play_again_button.draw(screen, font)
-            quit_end_button.draw(screen, font)
+            play_again_button.draw(screen, font, (200, 0, 0))
+            quit_end_button.draw(screen, font, (200, 0, 0))
             
 
 
