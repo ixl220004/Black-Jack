@@ -43,6 +43,10 @@ play_button = button(300, 200, 200, 60, "play")
 quit_button = button(300, 300, 200, 60, "Quit")
 play_again_button = button(250, 250, 200, 60, "Play Again",)
 quit_end_button = button(250, 330, 200, 60, "Quit",)
+bet_5_button = button(150, 320, 120, 50, "Add $5")
+bet_10_button = button(330, 320, 120, 50, "Add $10")
+bet_20_button = button(510, 320, 120, 50, "Add $20")
+bet_play_button = button(300, 380, 200, 60, "Play")
 
 
 font = pygame.font.SysFont("arial",36)
@@ -219,8 +223,29 @@ while running:
                     state = "game_over"
 
 
-            
+            elif state == "betting":
+                if bet_5_button.is_clicked(mouse_pos):
+                    if bet + 5 <= wallet:
+                        bet += 5
+                        bet_input = str(bet)
+                elif bet_10_button.is_clicked(mouse_pos):
+                    if bet + 10 <= wallet:
+                        bet += 10
+                        bet_input = str(bet)
+                elif bet_20_button.is_clicked(mouse_pos):
+                    if bet + 20 <= wallet:
+                        bet += 20
+                        bet_input = str(bet)
                 
+                elif bet_play_button.is_clicked(mouse_pos):
+                    if bet_input.isdigit():
+                        bet = int(bet_input)
+
+                        if bet > 0 and bet <= wallet:
+                            state = "playing"
+                            round_started = False
+
+
             #main playing phase
             #asks if player wants to hit or stand
 
@@ -289,9 +314,12 @@ while running:
             
             elif event.key == pygame.K_BACKSPACE:
                 bet_input = bet_input[:-1]
+
             else:
                 if event.unicode.isdigit():
                     bet_input += event.unicode
+
+        
         
         if state == "round_over" and event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
@@ -421,6 +449,11 @@ while running:
             draw_text("Type number...", 300, 250, font, (150, 150, 150))
         else:
             draw_text(f"${bet_input}", 300, 250, font)
+
+        bet_5_button.draw(screen, font)
+        bet_10_button.draw(screen, font)
+        bet_20_button.draw(screen, font)
+        bet_play_button.draw(screen, font)
 
     # ---------------- PLAYING + DEALER + ROUND OVER ----------------
     elif state in ["playing", "dealer_turn", "round_over", "game_over" ]:
