@@ -35,6 +35,8 @@ x, y = 800, 600
 screen = pygame.display.set_mode((x,y))
 pygame.display.set_caption("blackjack")
 
+background = pygame.image.load("table.png")
+background = pygame.transform.scale(background, (x, y))
 
 #buttons and UI
 hit_button = button(100, 350, 120, 50, "Hit")
@@ -46,7 +48,7 @@ quit_end_button = button(250, 330, 200, 60, "Quit",)
 bet_5_button = button(150, 320, 120, 50, "Add $5")
 bet_10_button = button(330, 320, 120, 50, "Add $10")
 bet_20_button = button(510, 320, 120, 50, "Add $20")
-bet_play_button = button(300, 380, 200, 60, "Play")
+bet_play_button = button(290, 420, 200, 60, "Play")
 
 
 font = pygame.font.SysFont("arial",36)
@@ -55,7 +57,6 @@ font = pygame.font.SysFont("arial",36)
 def draw_text(text, x, y, font, color=(255, 255, 255)):
     text_surface = font.render(text, True, color)
     screen.blit(text_surface, (x,y))
-
 
 def draw_hand(hand, area_rect, hide_first_card = False):
     x = area_rect.x + 10
@@ -75,7 +76,6 @@ def draw_hand(hand, area_rect, hide_first_card = False):
         
         x += CARD_SPACING
 
-
 def draw_card(hand):
     global deck, discard_pile
 
@@ -89,7 +89,6 @@ def draw_card(hand):
 
     card = deck.pop()
     hand.append(card)
-
 
 def calculate_hand(hand):
     total = 0
@@ -108,9 +107,6 @@ def calculate_hand(hand):
 
 def is_blackjack(hand):
     return len(hand) == 2 and calculate_hand(hand) == 21
-
-
-
 
 def resolve_round(player, dealer):
     player_total = calculate_hand(player)
@@ -205,6 +201,10 @@ while running:
             running = False
 
 
+        if state == "playing" and not round_started:
+            result = None
+
+
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
@@ -250,6 +250,7 @@ while running:
             #asks if player wants to hit or stand
 
             elif state == "playing":
+                result = None
 
                 if hit_button.is_clicked(mouse_pos):
                     draw_card(hand)
@@ -267,8 +268,27 @@ while running:
                         
             
                 if stand_button.is_clicked(mouse_pos):
-                    state = "dealer_turn"
-                    dealer_timer = pygame.time.get_ticks()
+                    player_bj = is_blackjack(hand)
+                    dealer_bj = is_blackjack(dealer_hand)
+
+                    if player_bj or dealer_bj:
+                        if player_bj and dealer_bj:
+                            result = "push_blackjack"
+                        elif player_bj:
+                            result = "blackjack"
+                        else:
+                            result = "dealer_blackjack"
+
+                        state = "round_over"
+                        result_applied = False
+
+                        continue
+
+
+
+                    else:
+                        state = "dealer_turn"
+                        dealer_timer = pygame.time.get_ticks()
 
 
 
@@ -359,24 +379,12 @@ while running:
         draw_card(dealer_hand)
         draw_card(dealer_hand)
 
-        player_bj = is_blackjack(hand)
-        dealer_bj = is_blackjack(dealer_hand)
+        
 
         
 
         round_started = True
 
-        if player_bj or dealer_bj:
-            if player_bj and dealer_bj:
-                result = "push_blackjack"
-            elif player_bj:
-                result = "blackjack"
-            else:
-                result = "dealer_blackjack"
-
-            state = "round_over"
-            round_over_entered = True
-            result_applied = False
         
     if state == "dealer_turn":
         current_time = pygame.time.get_ticks()
@@ -391,6 +399,9 @@ while running:
                 state = "round_over"
                 round_over_entered = True
                 result_applied = False
+        
+
+        
 
 
     if state == "round_over" and round_over_entered and not result_applied:
@@ -405,8 +416,12 @@ while running:
             elif result == "win" or result == "dealer_bust":
                 wallet += bet
 
+            elif result == "push" or result == "push_blackjack":
+                pass
+
             elif result in ["lose", "player_bust", "dealer_blackjack"]:
                 wallet -= bet
+            
 
 
             discard_pile.extend(hand)
@@ -431,7 +446,7 @@ while running:
     
 
     #DRAW
-    screen.fill((0, 100, 50))
+    screen.blit(background, (0, 0))
 
     # GLOBAL UI
     draw_text(f"Wallet: ${wallet}", 20, 20, font)
