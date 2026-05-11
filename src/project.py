@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-import BlackJack_functions
+
 
 
 pygame.init()
